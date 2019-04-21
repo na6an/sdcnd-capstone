@@ -1,8 +1,9 @@
-This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+# System Integration
+### Programming a Real Self-Driving Car
 
-Please use **one** of the two installation options, either native **or** docker installation.
-
-### Native Installation
+## Setup 
+Original repo can be found here:  
+https://github.com/udacity/CarND-Capstone  
 
 * Be sure that your workstation is running Ubuntu 16.04 Xenial Xerus or Ubuntu 14.04 Trusty Tahir. [Ubuntu downloads can be found here](https://www.ubuntu.com/download/desktop).
 * If using a Virtual Machine to install Ubuntu, use the following configuration as minimum:
@@ -19,23 +20,7 @@ Please use **one** of the two installation options, either native **or** docker 
   * Use this option to install the SDK on a workstation that already has ROS installed: [One Line SDK Install (binary)](https://bitbucket.org/DataspeedInc/dbw_mkz_ros/src/81e63fcc335d7b64139d7482017d6a97b405e250/ROS_SETUP.md?fileviewer=file-view-default)
 * Download the [Udacity Simulator](https://github.com/udacity/CarND-Capstone/releases).
 
-### Docker Installation
-[Install Docker](https://docs.docker.com/engine/installation/)
-
-Build the docker container
-```bash
-docker build . -t capstone
-```
-
-Run the docker file
-```bash
-docker run -p 4567:4567 -v $PWD:/capstone -v /tmp/log:/root/.ros/ --rm -it capstone
-```
-
-### Port Forwarding
-To set up port forwarding, please refer to the [instructions from term 2](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/16cf4a78-4fc7-49e1-8621-3450ca938b77)
-
-### Usage
+## Run
 
 1. Clone the project repository
 ```bash
@@ -56,19 +41,71 @@ roslaunch launch/styx.launch
 ```
 4. Run the simulator
 
-### Real world testing
-1. Download [training bag](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/traffic_light_bag_file.zip) that was recorded on the Udacity self-driving car.
-2. Unzip the file
-```bash
-unzip traffic_light_bag_file.zip
+
+
+`cd ~(path-to)/CarND-Capstone/ros`  
+Then,  
 ```
-3. Play the bag file
-```bash
-rosbag play -l traffic_light_bag_file/traffic_light_training.bag
+cd ros  
+catkin_make  
+source devel/setup.sh  
+roslaunch launch/styx.launch  
 ```
-4. Launch your project in site mode
-```bash
-cd CarND-Capstone/ros
-roslaunch launch/site.launch
+## Troubleshoot
+
 ```
-5. Confirm that traffic light detection works on real life images
+CMake Error at /opt/ros/kinetic/share/pcl_ros/cmake/pcl_rosConfig.cmake:113 (message):  
+  Project 'pcl_ros' specifies '/usr/include/pcl-1.7' as an include dir, which  
+  is not found.  It does neither exist as an absolute directory nor in  
+  '/opt/ros/kinetic//usr/include/pcl-1.7'.  Check the issue tracker  
+  'https://github.com/ros-perception/perception_pcl/issues' and consider  
+  creating a ticket if the problem has not been reported yet.  
+Call Stack (most recent call first):  
+  /opt/ros/kinetic/share/catkin/cmake/catkinConfig.cmake:76 (find_package)  
+  waypoint_follower/CMakeLists.txt:10 (find_package)
+```
+
+`sudo apt install ros-kinetic-pcl-ros`
+
+
+==
+
+`ERROR: cannot launch node of type [tl_detector/tl_detector.py]: can't locate node [tl_detector.py] in package [tl_detector]`
+
+`find ~/(path-to)/CarND-Capstone/ros -type f -iname "*.py" -exec chmod +x {} \;`
+
+
+
+## Code Structure
+
+  <img src="https://github.com/na6an/sdcnd-t3/blob/master/P3_System_Integration/img/final-project-ros-graph-v2.png" alt="alt text" width="920" height="640">  
+
+Below is a brief overview of the repo structure, along with descriptions of the ROS nodes.  
+The code that you will need to modify for the project will be contained entirely within the  
+/ros/src/ directory. Within this directory, you will find the following ROS packages:
+
+/ros/src/tl_detector/  
+This package contains the traffic light detection node: tl_detector.py.  
+This node takes in data from the /image_color, /current_pose, and /base_waypoints topics  
+and publishes the locations to stop for red traffic lights to the /traffic_waypoint topic.
+
+The /current_pose topic provides the vehicle's current position,  
+and /base_waypoints provides a complete list of waypoints the car will be following.
+
+You will build both a traffic light detection node and a traffic light classification node.  
+Traffic light detection should take place within tl_detector.py,  
+whereas traffic light classification should take place within ../tl_detector/light_classification_model/tl_classfier.py.
+
+
+/ros/src/waypoint_updater/
+This package contains the waypoint updater node: waypoint_updater.py.  
+The purpose of this node is to update the target velocity property of each waypoint  
+based on traffic light and obstacle detection data.  
+This node will subscribe to the /base_waypoints, /current_pose, /obstacle_waypoint,  
+and /traffic_waypoint topics, and publish a list of waypoints ahead of the car  
+with target velocities to the /final_waypoints topic.
+
+
+/ros/src/twist_controller/
+Carla is equipped with a drive-by-wire (dbw) system, meaning the throttle, brake, and steering have electronic control.  
+This package contains the files that are responsible for control of the vehicle: the node dbw_node.py and the file twist_controller.py, along with a pid and lowpass filter that you can use in your implementation. The dbw_node subscribes to the /current_velocity topic along with the /twist_cmd topic to receive target linear and angular velocities. Additionally, this node will subscribe to /vehicle/dbw_enabled, which indicates if the car is under dbw or driver control. This node will publish throttle, brake, and steering commands to the /vehicle/throttle_cmd, /vehicle/brake_cmd, and /vehicle/steering_cmd topics.
