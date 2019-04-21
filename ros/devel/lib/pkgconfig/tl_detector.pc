@@ -1,0 +1,8 @@
+prefix=/home/nathan/Desktop/CarND-official/ros/devel
+
+Name: tl_detector
+Description: Description of tl_detector
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/nathan/Desktop/CarND-official/ros/devel/lib 
+Requires: 

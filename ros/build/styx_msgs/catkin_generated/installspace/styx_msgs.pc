@@ -1,0 +1,8 @@
+prefix=/home/nathan/Desktop/CarND-official/ros/install
+
+Name: styx_msgs
+Description: Description of styx_msgs
+Version: 0.0.0
+Cflags: -I/home/nathan/Desktop/CarND-official/ros/install/include
+Libs: -L/home/nathan/Desktop/CarND-official/ros/install/lib 
+Requires: 

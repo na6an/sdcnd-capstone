@@ -1,0 +1,8 @@
+prefix=/home/nathan/Desktop/CarND-official/ros/devel
+
+Name: styx
+Description: Description of styx
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/nathan/Desktop/CarND-official/ros/devel/lib 
+Requires: 
